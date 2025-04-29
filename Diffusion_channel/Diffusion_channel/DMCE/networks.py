@@ -4,22 +4,6 @@ import math
 from typing import Union
 from DMCE import utils
 
-
-def get_positional_embedding(t: torch.Tensor, dim: int) -> torch.Tensor:
-
-    half_dim = dim // 2
-    emb = math.log(10000) / (half_dim - 1)
-    emb = torch.exp(- emb * torch.arange(half_dim, device=t.device))
-    emb = t[:, None] * emb[None, :]
-    emb = torch.cat((emb.sin(), emb.cos()), dim=-1)
-
-    # if dim is an odd number, pad the last entry of the embedding vector with zeros
-    if dim % 2 != 0:
-        emb = torch.nn.functional.pad(emb, (0, 1), 'constant', 0)
-    return emb
-
-
-
 class CNN(nn.Module):
     def __init__(self,
                  data_shape: tuple,
@@ -117,4 +101,17 @@ class CNN(nn.Module):
             x = x + scale[:, :, None, None] * x + shift[:, :, None, None]
         x = self.cnn_post(x)
         return x
+
+def get_positional_embedding(t: torch.Tensor, dim: int) -> torch.Tensor:
+
+    half_dim = dim // 2
+    emb = math.log(10000) / (half_dim - 1)
+    emb = torch.exp(- emb * torch.arange(half_dim, device=t.device))
+    emb = t[:, None] * emb[None, :]
+    emb = torch.cat((emb.sin(), emb.cos()), dim=-1)
+
+    # if dim is an odd number, pad the last entry of the embedding vector with zeros
+    if dim % 2 != 0:
+        emb = torch.nn.functional.pad(emb, (0, 1), 'constant', 0)
+    return emb
 
